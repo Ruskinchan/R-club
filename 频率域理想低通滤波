@@ -1,0 +1,21 @@
+%频率域滤波  
+clc;close all;  
+f=imread('C:\Users\Grasip\Desktop\m.jpg');  
+f=im2double(f);  
+F=fft2(double(f));
+F=fftshift(F);
+[M,N,O]=size(f);  
+D0=input('输入截止频率');  
+h1=zeros(M,N);  
+for i=1:M  
+    for j=i:N  
+            if(sqrt(((i-M/2)^2+(j-N/2)^2))<D0)  
+                h1(i,j)=1; 
+            end 
+    end  
+end  
+G1=F.*h1;  
+G1=ifftshift(G1);  
+g1=real(ifft2(G1));  
+subplot(2,3,1);imshow(f);title('原图');  
+subplot(2,3,2);imshow(g1);title('理想低通滤波');
