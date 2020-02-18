@@ -1,0 +1,37 @@
+clear
+I=imread('C:\Users\LENOVO\Desktop\临时文件\1-8.jpg');
+I=imnoise(I,'gaussian');
+[m,n]=size(I);
+J=zeros(m+2,n+2);%临时存贮
+K=zeros(m+2,n+2);%输出图像
+J(2:m+1,2:n+1)=I(1:m,1:n);
+%加墙
+J(2:m+1,1)=I(1:m,1);%LEFT
+J(2:m+1,n+2)=I(1:m,n);%RIGHT
+J(1,1:n+2)=J(2,1:n+2);%UP
+J(m+2,1:n+2)=J(m+1,1:n+2);%DOWN
+%高斯滤波模板
+h=[1 2 1;2 4 2 ;1 2 1 ];
+coef=1/16;
+[MBH,MBL]=size(h);
+%滤波运算
+for i=2:m+1
+for j=2:n+1
+%(i,j)为模板中心
+result=0;
+for k=1:MBH
+for l=1:MBL
+result=result+h(k,l)*J(i+k-2,j+l-2);%新像素值
+end
+end
+result=uint8(result*coef);
+K(i,j)=result;
+end
+end
+J=K(2:m+1,2:n+1);
+subplot(131)
+imshow(J,[0,255]);
+subplot(132)
+imshow(I)
+subplot(133)
+imshow(imfilter(I,fspecial('gaussian',3,0.8)))
