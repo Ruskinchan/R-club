@@ -6,27 +6,18 @@ g2=rgb2gray(J2);
 figure('units','normalized','position',[0 0 1 1]);
 subplot(2,4,1),imshow(J1),xlabel('椒盐噪声'); %显示有椒盐噪声图像
 subplot(2,4,2),imshow(J2),xlabel('高斯噪声'); %显示有高斯噪声图像
-
 % %  邻域平均法  neighborhood averaging
-
-% imfilter 可进行多维图像（RGB等）进行空间滤波，且可选参数较多
-% filter2 / medfilt2 只能对二维图像（灰度图）进行空间滤波,
-% 两个函数结果类型不一样，只需要在I1=filter2(h,I)后面加上I1=uint8(I1)进行类型转换，结果就是一样的。
-
 K1 = filter2(fspecial('average',3),g1); % 对椒盐噪声进行 3*3 模板平滑滤波
 K2 = filter2(fspecial('average',11),g1);
 k3 = imfilter(I,fspecial('average',3),'replicate');
 K4 = filter2(fspecial('average',3),g2); % 对高斯噪声进行 3*3 模板平滑滤波
-
 subplot(2,4,3),imshow(uint8(K1)),xlabel({'对椒盐噪声进行';'3*3 模板平滑滤波'});
 subplot(2,4,4),imshow(uint8(K1)),xlabel({'对椒盐噪声进行';'11*11 模板平滑滤波'});
 subplot(2,4,5),imshow(k3),xlabel('3*3 imfilter空间滤波');
 subplot(2,4,6),imshow(uint8(K4)),xlabel('对高斯噪声进行 3*3 模板平滑滤波');
-
 % 中值滤波
 I1= medfilt2(g1,[3,3]); % 对有椒盐噪声图像进行5×5方形窗口中值滤波
 I2= medfilt2(g2,[3,3]); % 对有高斯噪声图像进行5×5方形窗口中值滤波
-
 subplot(2,4,7),imshow(I1),xlabel({'椒盐噪声进行';'3*3 中值滤波'}); 
 subplot(2,4,8),imshow(I2),xlabel({'高斯噪声进行';'3*3 中值滤波'}); 
 ————————————————
