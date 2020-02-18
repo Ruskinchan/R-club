@@ -1,0 +1,36 @@
+clear;                 
+X=imread('life.jpg');            
+X=rgb2gray(X);
+subplot(221);          
+imshow(X);             
+title('原始图像');                  
+% 生成含噪图像并图示
+init=2055615866;       
+randn('seed',init);      
+X=double(X);
+% 添加随机噪声
+XX=X+8*randn(size(X));  
+subplot(222);             
+imshow(uint8(XX));              
+title(' 含噪图像 ');       
+%用小波函数coif2对图像XX进行2层
+% 分解
+[c,l]=wavedec2(XX,2,'coif2'); 
+% 设置尺度向量
+n=[1,2];                  
+% 设置阈值向量 , 对高频小波系数进行阈值处理
+p=[10.28,24.08]; 
+nc=wthcoef2('h',c,l,n,p,'s');
+% 图像的二维小波重构
+X1=waverec2(nc,l,'coif2');   
+subplot(223);              
+imshow(uint8(X1));                
+%colormap(map);            
+title(' 第一次消噪后的图像 '); 
+%再次对高频小波系数进行阈值处理
+mc=wthcoef2('v',nc,l,n,p,'s');
+% 图像的二维小波重构
+X2=waverec2(mc,l,'coif2');  
+subplot(224);             
+imshow(uint8(X2));               
+title(' 第二次消噪后的图像 ');
