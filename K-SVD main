@@ -1,0 +1,25 @@
+clear
+bb=8; 
+RR=4; 
+K=RR*bb^2;
+sigma = 50; 
+ [IMin0,pp]=imread('C:\Users\LENOVO\Desktop\临时文件\123456.jpg');
+IMin0=im2double(IMin0);
+if (length(size(IMin0))>2)
+    IMin0 = rgb2gray(IMin0);
+if (max(IMin0(:))<2)
+    IMin0 = IMin0*255;
+end
+IMin=IMin0+sigma*randn(size(IMin0));
+PSNRIn = 20*log10(255/sqrt(mean((IMin(:)-IMin0(:)).^2)));
+tic
+[IoutAdaptive,output] = denoiseImageKSVD(IMin, sigma,K);
+PSNROut = 20*log10(255/sqrt(mean((IoutAdaptive(:)-IMin0(:)).^2)));
+figure;
+subplot(1,3,1); imshow(IMin0,[]); title('输入图像');
+subplot(1,3,2); imshow(IMin,[]); title(strcat(['噪声图像,',num2str(PSNRIn),'dB']));
+subplot(1,3,3); imshow(IoutAdaptive,[]); title(strcat(['去噪后图像, ',num2str(PSNROut),'dB']));
+figure;
+I = displayDictionaryElementsAsImage(output.D, floor(sqrt(K)),floor(size(output.D,2)/floor(sqrt(K))),bb,bb);
+title('从噪声图像中训练的块字典');
+toc
