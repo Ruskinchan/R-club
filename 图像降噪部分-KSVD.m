@@ -1,8 +1,8 @@
-function [IOut,output] = denoiseImageKSVD(Image,sigma,K,varargin)%±ä³¤¶ÈÊäÈë×ÚÁ¿£¨Êµ¼ÊÊäÈëµÄ²ÎÁ¿£©  
+function [IOut,output] = denoiseImageKSVD(Image,sigma,K,varargin)%å˜é•¿åº¦è¾“å…¥å®—é‡ï¼ˆå®é™…è¾“å…¥çš„å‚é‡ï¼‰  
 %==========================================================================  
 %   P E R F O R M   D E N O I S I N G   U S I N G   A  D I C T  I O N A R Y  
 %                  T R A I N E D   O N   N O I S Y   I M A G E
-%                  Ê¹ÓÃ×Öµä¶ÔÔëÉùÍ¼Ïñ½øĞĞ½µÔë
+%                  ä½¿ç”¨å­—å…¸å¯¹å™ªå£°å›¾åƒè¿›è¡Œé™å™ª
 %==========================================================================  
 % function IOut = denoiseImageKSVD(Image,sigma,K,varargin)  
 % denoise an image by sparsely representing each block with the  
@@ -22,16 +22,16 @@ function [IOut,output] = denoiseImageKSVD(Image,sigma,K,varargin)%±ä³¤¶ÈÊäÈë×ÚÁ¿
 % ===================================================================  
 % INPUT ARGUMENTS : Image - the noisy image (gray-level scale)  
 %                   sigma - the s.d. of the noise (assume to be white Gaussian).  
-%                   K - the number of atoms in the trained dictionary. ÑµÁ·×ÖµäµÄÔ­×ÓÊıÄ¿ 
+%                   K - the number of atoms in the trained dictionary. è®­ç»ƒå­—å…¸çš„åŸå­æ•°ç›® 
 %    Optional arguments:                
 %                  'blockSize' - the size of the blocks the algorithm  
 %                       works. All blocks are squares, therefore the given  
 %                       parameter should be one number (width or height).  
-%                       Default value: 8.  ¿é´óĞ¡
+%                       Default value: 8.  å—å¤§å°
 %                       'errorFactor' - a factor that multiplies sigma in order  
 %                       to set the allowed representation error. In the  
 %                       experiments presented in the paper, it was set to 1.15  
-%                       (which is also the default  value here).Îó²îÒò×Ó  
+%                       (which is also the default  value here).è¯¯å·®å› å­  
 %                  'maxBlocksToConsider' - maximal number of blocks that  
 %                       can be processed. This number is dependent on the memory  
 %                       capabilities of the machine, and performances?  
@@ -43,7 +43,7 @@ function [IOut,output] = denoiseImageKSVD(Image,sigma,K,varargin)%±ä³¤¶ÈÊäÈë×ÚÁ¿
 %                       blocks. Default value is 1. However, if the image is  
 %                       large, this number increases automatically (because of  
 %                       memory requirements). Larger values result faster  
-%                       performances (because of fewer processed blocks). »¬¶¯Òò×Ó 
+%                       performances (because of fewer processed blocks). æ»‘åŠ¨å› å­ 
 %                  'numKSVDIters' - the number of KSVD iterations processed  
 %                       blocks from the noisy image. If the number of  
 %                       blocks in the image is larger than this number,  
@@ -58,34 +58,34 @@ function [IOut,output] = denoiseImageKSVD(Image,sigma,K,varargin)%±ä³¤¶ÈÊäÈë×ÚÁ¿
 %                       announcement after finishing each iteration will appear,  
 %                       as also a measure concerning the progress of the  
 %                       algorithm (the average number of required coefficients  
-%                       for representation). The default value is 1 (on). ÏÔÊ¾±êÖ¾£¬Ã¿´Îµü´ú½áÊøÖ®ºóÏÔÊ¾ 
+%                       for representation). The default value is 1 (on). æ˜¾ç¤ºæ ‡å¿—ï¼Œæ¯æ¬¡è¿­ä»£ç»“æŸä¹‹åæ˜¾ç¤º 
 %                  'waitBarOn' - can be set to either 1 or 0. If  
 %                       waitBarOn==1 a waitbar, presenting the progress of the  
-%                       algorithm will be displayed.  µÈ´ıÀ¸£¨Ëã·¨½ø³Ì½«ÏÔÊ¾£©
+%                       algorithm will be displayed.  ç­‰å¾…æ ï¼ˆç®—æ³•è¿›ç¨‹å°†æ˜¾ç¤ºï¼‰
 % OUTPUT ARGUMENTS : Iout - a 2-dimensional array in the same size of the  
-%                       input image, that contains the cleaned image.ÓëÊäÈëÍ¼Ïñ³ß´çÏàÍ¬µÄ¾ØÕó£¬°üº¬ÇåÀíºóµÄÍ¼Ïñ¡£  
-%                    output.D - the trained dictionary.ÑµÁ·×Öµä  
+%                       input image, that contains the cleaned image.ä¸è¾“å…¥å›¾åƒå°ºå¯¸ç›¸åŒçš„çŸ©é˜µï¼ŒåŒ…å«æ¸…ç†åçš„å›¾åƒã€‚  
+%                    output.D - the trained dictionary.è®­ç»ƒå­—å…¸  
 % =========================================================================  
    
-% first, train a dictionary on the noisy imageÊ×ÏÈÔÚÔëÉùÍ¼ÏñÉÏ½øĞĞ×ÖµäÑµÁ·  
+% first, train a dictionary on the noisy imageé¦–å…ˆåœ¨å™ªå£°å›¾åƒä¸Šè¿›è¡Œå­—å…¸è®­ç»ƒ  
    
 reduceDC = 1;  
-[NN1,NN2] = size(Image);%Í¼Ïñ´óĞ¡£¬  
-waitBarOn = 1;  %µÈ´ıÀ¸
-if (sigma > 5)%%%sigma=50   numIterOfKsvd = 10;  sigmaÊÇ¸ßË¹ÔëÉùµÄ±ê×¼²î
-    numIterOfKsvd = 10;  %Ä¬ÈÏKSVDµü´ú´ÎÊıÎª10´Î
+[NN1,NN2] = size(Image);%å›¾åƒå¤§å°ï¼Œ  
+waitBarOn = 1;  %ç­‰å¾…æ 
+if (sigma > 5)%%%sigma=50   numIterOfKsvd = 10;  sigmaæ˜¯é«˜æ–¯å™ªå£°çš„æ ‡å‡†å·®
+    numIterOfKsvd = 10;  %é»˜è®¤KSVDè¿­ä»£æ¬¡æ•°ä¸º10æ¬¡
 else  
     numIterOfKsvd = 5;  
 end  
-C = 1.15;  %Îó²îÒò×Ó
-maxBlocksToConsider = 260000;  %¿¼ÂÇ×î´ó¿éÊıÄ¿£¿
-slidingDis = 1;  %»¬¶¯Òò×Ó£¬¿ÉËæÍ¼ÏñµÄÔö´ó¶øÔö´ó¡£»¬¶¯·Ö½â£¬ÖØµş½»²æ
-bb = 8;%·Ö½â¿éµÄ´óĞ¡  
-maxNumBlocksToTrainOn = 65000;%ĞèÒªÑµÁ·µÄÔ­×ÓÊıÄ¿  
+C = 1.15;  %è¯¯å·®å› å­
+maxBlocksToConsider = 260000;  %è€ƒè™‘æœ€å¤§å—æ•°ç›®ï¼Ÿ
+slidingDis = 1;  %æ»‘åŠ¨å› å­ï¼Œå¯éšå›¾åƒçš„å¢å¤§è€Œå¢å¤§ã€‚æ»‘åŠ¨åˆ†è§£ï¼Œé‡å äº¤å‰
+bb = 8;%åˆ†è§£å—çš„å¤§å°  
+maxNumBlocksToTrainOn = 65000;%éœ€è¦è®­ç»ƒçš„åŸå­æ•°ç›®  
 displayFlag = 1;  
-hh=length(varargin)%ÊäÈë²ÎÊıµÄ³¤¶È
-%TF=strcmp(a,b)ÊÇ×Ö·û´®±È½Ïº¯Êı¡£ÏàÍ¬·µ»ØÖµÎª1£¬·ñÔòÎª0.
-% for argI = 1:2:length(varargin)         %Êµ¼ÊÊäÈëµÄ²ÎÁ¿
+hh=length(varargin)%è¾“å…¥å‚æ•°çš„é•¿åº¦
+%TF=strcmp(a,b)æ˜¯å­—ç¬¦ä¸²æ¯”è¾ƒå‡½æ•°ã€‚ç›¸åŒè¿”å›å€¼ä¸º1ï¼Œå¦åˆ™ä¸º0.
+% for argI = 1:2:length(varargin)         %å®é™…è¾“å…¥çš„å‚é‡
 %     if (strcmp(varargin{argI}, 'slidingFactor'))  
 %         slidingDis = varargin{argI+1};  
 %     end  
@@ -118,42 +118,42 @@ end
    
 % first, train a dictionary on blocks from the noisy image  
    
-if(prod([NN1,NN2]-bb+1)> maxNumBlocksToTrainOn) %probº¯Êı·µ»ØÔªËØ³Ë»ı£¬im2colº¯ÊıÖĞ¾ØÕó·Ö½â£¬×Ó¾ØÕó´óĞ¡Îªbb*bb¡£prob·µ»Ø·Ö½âºó¾ØÕóµÄÁĞÊı¡£ 
-    randPermutation =  randperm(prod([NN1,NN2]-bb+1)); %Ëæ»úÖÃ»»ĞòÁĞ¡£ 
+if(prod([NN1,NN2]-bb+1)> maxNumBlocksToTrainOn) %probå‡½æ•°è¿”å›å…ƒç´ ä¹˜ç§¯ï¼Œim2colå‡½æ•°ä¸­çŸ©é˜µåˆ†è§£ï¼Œå­çŸ©é˜µå¤§å°ä¸ºbb*bbã€‚probè¿”å›åˆ†è§£åçŸ©é˜µçš„åˆ—æ•°ã€‚ 
+    randPermutation =  randperm(prod([NN1,NN2]-bb+1)); %éšæœºç½®æ¢åºåˆ—ã€‚ 
     selectedBlocks = randPermutation(1:maxNumBlocksToTrainOn);  
    
-    blkMatrix = zeros(bb^2,maxNumBlocksToTrainOn); %È«0¾ØÕó64*65000 
-    for i = 1:maxNumBlocksToTrainOn  %65000´ÎÑ­»·
-        [row,col] = ind2sub(size(Image)-bb+1,selectedBlocks(i)); %ÏßĞÔË÷Òı×ª»»³ÉÏàÓ¦µÄÏÂ±ê 
+    blkMatrix = zeros(bb^2,maxNumBlocksToTrainOn); %å…¨0çŸ©é˜µ64*65000 
+    for i = 1:maxNumBlocksToTrainOn  %65000æ¬¡å¾ªç¯
+        [row,col] = ind2sub(size(Image)-bb+1,selectedBlocks(i)); %çº¿æ€§ç´¢å¼•è½¬æ¢æˆç›¸åº”çš„ä¸‹æ ‡ 
         currBlock = Image(row:row+bb-1,col:col+bb-1);  
         blkMatrix(:,i) = currBlock(:);  
     end  
 else  
-    blkMatrix = im2col(Image,[bb,bb],'sliding');%%%%%%%8*8=64   ËùÒÔblkMatrix¾ØÕó´óĞ¡Îª£º64*[£¨NN1-bb+1£©*(NN2-bb+1)]  
+    blkMatrix = im2col(Image,[bb,bb],'sliding');%%%%%%%8*8=64   æ‰€ä»¥blkMatrixçŸ©é˜µå¤§å°ä¸ºï¼š64*[ï¼ˆNN1-bb+1ï¼‰*(NN2-bb+1)]  
 end  
    
 param.K = K;%%%K=256  4*8*8=256  
-param.numIteration = numIterOfKsvd ;%sigma=50   ËùÒÔnumIterOfKsvd = 10;  
+param.numIteration = numIterOfKsvd ;%sigma=50   æ‰€ä»¥numIterOfKsvd = 10;  
    
 param.errorFlag = 1; % decompose signals until a certain error is reached. do not use fix number of coefficients.  
 param.errorGoal = sigma*C;  
 param.preserveDCAtom = 0;  
    
-Pn=ceil(sqrt(K));%%Pn=16  %ÏòÉÏÈ¡Õû£¨Ç¡ºÃ256ÕûÊı¿ª·½£©
-DCT=zeros(bb,Pn);%%bb=8  8*16µÄÈ«0¾ØÕó
+Pn=ceil(sqrt(K));%%Pn=16  %å‘ä¸Šå–æ•´ï¼ˆæ°å¥½256æ•´æ•°å¼€æ–¹ï¼‰
+DCT=zeros(bb,Pn);%%bb=8  8*16çš„å…¨0çŸ©é˜µ
 for k=0:1:Pn-1,  
     V=cos([0:1:bb-1]'*k*pi/Pn);  
     if k>0, V=V-mean(V); end;  
-    DCT(:,k+1)=V/norm(V);  %VÊÇÏòÁ¿£¬normº¯Êı·µ»ØVµÄ¶ş·¶Êı¡£ÔªËØÆ½·½ºÍ¿ª·½¡£
+    DCT(:,k+1)=V/norm(V);  %Væ˜¯å‘é‡ï¼Œnormå‡½æ•°è¿”å›Vçš„äºŒèŒƒæ•°ã€‚å…ƒç´ å¹³æ–¹å’Œå¼€æ–¹ã€‚
 end;  
-DCT=kron(DCT,DCT);%%%%%¸úDCTÖĞµÄ´úÂëÒ»ÑùµÄ   kronecker³Ë»ı  64*256µÄ¾ØÕó  
+DCT=kron(DCT,DCT);%%%%%è·ŸDCTä¸­çš„ä»£ç ä¸€æ ·çš„   kroneckerä¹˜ç§¯  64*256çš„çŸ©é˜µ  
    
-param.initialDictionary = DCT(:,1:param.K );%%%% È¡ÁË256ÁĞ¡£Ò²¾ÍÊÇÈ«²¿¶¼È¡ÁË  
+param.initialDictionary = DCT(:,1:param.K );%%%% å–äº†256åˆ—ã€‚ä¹Ÿå°±æ˜¯å…¨éƒ¨éƒ½å–äº†  
 param.InitializationMethod =  'GivenMatrix';  
    
 if (reduceDC)%%reduceDC=1  
-    vecOfMeans = mean(blkMatrix);  %Çó¿é¾ØÕóÃ¿Ò»ÁĞ¾ùÖµ
-    blkMatrix = blkMatrix-ones(size(blkMatrix,1),1)*vecOfMeans;%%%¼õÈ¥Æ½¾ùÊı  blkMatrix¾ØÕó´óĞ¡Îª£º64*[£¨NN1-bb+1£©*(NN2-bb+1)]  
+    vecOfMeans = mean(blkMatrix);  %æ±‚å—çŸ©é˜µæ¯ä¸€åˆ—å‡å€¼
+    blkMatrix = blkMatrix-ones(size(blkMatrix,1),1)*vecOfMeans;%%%å‡å»å¹³å‡æ•°  blkMatrixçŸ©é˜µå¤§å°ä¸ºï¼š64*[ï¼ˆNN1-bb+1ï¼‰*(NN2-bb+1)]  
 end  
    
 if (waitBarOn)%waitBarOn=1  
@@ -165,7 +165,7 @@ end
    
    
 param.displayProgress = displayFlag;%displayFlag = 1;  
-[Dictionary,output] = KSVD(blkMatrix,param);%%%%%%%×îºËĞÄµÄº¯Êı%%%%%%%%%%%
+[Dictionary,output] = KSVD(blkMatrix,param);%%%%%%%æœ€æ ¸å¿ƒçš„å‡½æ•°%%%%%%%%%%%
 output.D = Dictionary;  
    
 if (displayFlag)%displayFlag = 1;  
